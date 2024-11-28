@@ -322,28 +322,38 @@ class AutotuneTMC:
             # return 0.5 * coolthrs
             return 0.5 * vmaxpwm
 
-    def _setup_pwm(self, tgoal, pwmthrs):
-        motor = self.motor_object
-        pwmgrad = motor.pwmgrad(volts=self.voltage, fclk=self.fclk)
-        pwmofs = motor.pwmofs(volts=self.voltage, current=self.run_current)
-        self._set_driver_field('pwm_autoscale', PWM_AUTOSCALE)
-        self._set_driver_field('pwm_autograd', PWM_AUTOGRAD)
-        self._set_driver_field('pwm_grad', pwmgrad)
-        self._set_driver_field('pwm_ofs', pwmofs)
-        self._set_driver_field('pwm_reg', PWM_REG)
-        self._set_driver_field('pwm_lim', PWM_LIM)
-        if tgoal == TuningGoal.AUTOSWITCH:
-            self._set_driver_velocity_field('tpwmthrs', pwmthrs)
-            self._set_driver_field('en_pwm_mode', True)
-            self._set_driver_field('en_spreadcycle', False) # TMC2208 use en_spreadcycle instead of en_pwm_mode
-        elif tgoal == TuningGoal.SILENT:
-            self._set_driver_field('tpwmthrs', 0)
-            self._set_driver_field('en_pwm_mode', True)
-            self._set_driver_field('en_spreadcycle', False) # TMC2208 use en_spreadcycle instead of en_pwm_mode
-        elif tgoal == TuningGoal.PERFORMANCE:
-            self._set_driver_field('tpwmthrs', 0xfffff)
-            self._set_driver_field('en_pwm_mode', False)
-            self._set_driver_field('en_spreadcycle', True) # TMC2208 use en_spreadcycle instead of en_pwm_mode
+  def _setup_pwm(self, tgoal, pwmthrs):
+    motor = self.motor_object
+    pwmgrad = motor.pwmgrad(volts=self.voltage, fclk=self.fclk)
+    pwmofs = motor.pwmofs(volts=self.voltage, current=self.run_current)
+    self._set_driver_field('pwm_autoscale', PWM_AUTOSCALE)
+    self._set_driver_field('pwm_autograd', PWM_AUTOGRAD)
+    self._set_driver_field('pwm_grad', pwmgrad)
+    self._set_driver_field('pwm_ofs', pwmofs)
+    self._set_driver_field('pwm_reg', PWM_REG)
+    self._set_driver_field('pwm_lim', PWM_LIM)
+
+    # Force Z-axis stepper to use SpreadCycle mode
+    if self.name.startswith("stepper_z"):
+        self._set_driver_field('tpwmthrs', 0xfffff)
+        self._set_driver_field('en_pwm_mode', False)
+        self._set_driver_field('en_spreadcycle', True)  # For TMC2208 driver
+        return
+
+    # Set mode based on the tuning goal
+    if tgoal == TuningGoal.AUTOSWITCH:
+        self._set_driver_velocity_field('tpwmthrs', pwmthrs)
+        self._set_driver_field('en_pwm_mode', True)
+        self._set_driver_field('en_spreadcycle', False)  # For TMC2208
+    elif tgoal == TuningGoal.SILENT:
+        self._set_driver_field('tpwmthrs', 0)
+        self._set_driver_field('en_pwm_mode', True)
+        self._set_driver_field('en_spreadcycle', False)  # For TMC2208
+    elif tgoal == TuningGoal.PERFORMANCE:
+        self._set_driver_field('tpwmthrs', 0xfffff)
+        self._set_driver_field('en_pwm_mode', False)
+        self._set_driver_field('en_spreadcycle', True)  # For TMC2208
+
 
     def _setup_spreadcycle(self):
         ncycles = int(math.ceil(self.fclk / self.pwm_freq_target))
