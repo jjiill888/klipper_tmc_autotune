@@ -17,7 +17,7 @@ In particular, it enables StealthChop by default on Z motors and extruders, Cool
 
 ## Installation
 
-Creatiily 3D's klipper directory is in /usr/share/klipper/
+Creatily 3D's klipper directory is in /usr/share/klipper/
 
 ```
 git clone -b k1c/k1se https://github.com/jjiill888/klipper_tmc_autotune.git
