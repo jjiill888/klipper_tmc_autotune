@@ -17,13 +17,21 @@ In particular, it enables StealthChop by default on Z motors and extruders, Cool
 
 ## Installation
 
-To install this plugin, run the installation script using the following command over SSH. This script will download this GitHub repository to your RaspberryPi home directory, and symlink the files in the Klipper extra folder.
+Creatiily 3D's klipper directory is in /usr/share/klipper/
 
-```bash
-wget -O - https://raw.githubusercontent.com/andrewmcgr/klipper_tmc_autotune/main/install.sh | bash
+```
+git clone -b k1c/k1se https://github.com/jjiill888/klipper_tmc_autotune.git
 ```
 
-Then, add the following to your `moonraker.conf` to enable automatic updates:
+copy autotune_tmc.py.motor_constants.py.motor_database.cfg to klippy/extras/
+```
+sudo cp /usr/share/klipper/klipper_tmc_autotune/autotune_tmc.py /usr/share/klipper/klippy/extras/
+sudo cp /usr/share/klipper/klipper_tmc_autotune/motor_constants.py /usr/share/klipper/klippy/extras/
+sudo cp /usr/share/klipper/klipper_tmc_autotune/motor_database.cfg /usr/share/klipper/klippy/extras/
+sudo cp /usr/share/klipper/klipper_tmc_autotune/tmc.py /usr/share/klipper/klippy/extras/
+```
+
+Then, add the following to your `moonraker.conf` to enable automatic updates:（This is a step that does not need to be taken）
 ```ini
 [update_manager klipper_tmc_autotune]
 type: git_repo
