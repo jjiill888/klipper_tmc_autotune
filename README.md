@@ -17,13 +17,15 @@ In particular, it enables StealthChop by default on Z motors and extruders, Cool
 
 ## Installation
 
-Creatily 3D's klipper directory is in /usr/share/klipper/
+Creatily's klipper directory is in /usr/share/klipper/
 
 ```
 git clone -b k1c/k1se https://github.com/jjiill888/klipper_tmc_autotune.git
 ```
 
-copy autotune_tmc.py.motor_constants.py.motor_database.cfg to klippy/extras/
+copy autotune_tmc.py, motor_constants.py, motor_database.cfg, tmc.py to klippy/extras/. 
+
+I edit creatily's tmc.py, support to TMCtstepHelper
 ```
 sudo cp /usr/share/klipper/klipper_tmc_autotune/autotune_tmc.py /usr/share/klipper/klippy/extras/
 sudo cp /usr/share/klipper/klipper_tmc_autotune/motor_constants.py /usr/share/klipper/klippy/extras/
