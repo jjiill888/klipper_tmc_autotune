@@ -319,23 +319,29 @@ class AutotuneTMC:
             self._set_driver_field('en_pwm_mode', False)
             self._set_driver_field('en_spreadcycle', True) # TMC2208 use en_spreadcycle instead of en_pwm_mode
     def _setup_spreadcycle(self):
-        ncycles = int(math.ceil(self.fclk / self.pwm_freq_target))
-        sdcycles = ncycles / 4
-        if self.toff == 0 or self.toff is None:
-            # About half the cycle should be taken by the two slow decay cycles
-            self.toff = max(min(int(math.ceil(max(sdcycles - 24, 0) / 32)), 15), 1)
-        if self.tbl is None:
-            self.tbl = TBL
-        if self.toff == 1 and self.tbl == 0:
-            # blank time of 16 cycles will not work in this case
-            self.tbl = 1
-        pfdcycles = ncycles - (24 + 32 * self.toff) * 2 - [16, 34, 36, 54][self.tbl]
-        if self.tpfd is None:
-            self.tpfd = max(0, min(15, int(math.ceil(pfdcycles / 128))))
-        logging.info("autotune_tmc %s ncycles=%d pfdcycles=%d", self.name, ncycles, pfdcycles)
-        self._set_driver_field('tpfd', self.tpfd)
-        self._set_driver_field('tbl', self.tbl)
-        self._set_driver_field('toff', self.toff)
+    ncycles = int(math.ceil(self.fclk / self.pwm_freq_target))
+    sdcycles = ncycles / 4
+
+    # Adjust TOFF and TBL
+    self.toff = 5  # Increase to improve stability
+    self.tbl = 2   # Adjust for smoother waveforms
+    self._set_driver_field('toff', self.toff)
+    self._set_driver_field('tbl', self.tbl)
+
+    # Adjust TPFD based on the blank time
+    pfdcycles = ncycles - (24 + 32 * self.toff) * 2 - [16, 34, 36, 54][self.tbl]
+    self.tpfd = max(0, min(15, int(math.ceil(pfdcycles / 128))))
+    self._set_driver_field('tpfd', self.tpfd)
+
+    # Adjust hysteresis for stability
+    hstrt = 4
+    hend = -2
+    self._set_driver_field('hstrt', hstrt)
+    self._set_driver_field('hend', hend)
+
+    logging.info("autotune_tmc SpreadCycle parameters: toff=%d, tbl=%d, hstrt=%d, hend=%d",
+                 self.toff, self.tbl, hstrt, hend)
+
     def _setup_coolstep(self, coolthrs):
         self._set_driver_velocity_field('tcoolthrs', coolthrs)
         self._set_driver_field('sgt', self.sgt)
