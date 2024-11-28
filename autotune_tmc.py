@@ -319,8 +319,8 @@ class AutotuneTMC:
             self._set_driver_field('en_pwm_mode', False)
             self._set_driver_field('en_spreadcycle', True) # TMC2208 use en_spreadcycle instead of en_pwm_mode
     def _setup_spreadcycle(self):
-    ncycles = int(math.ceil(self.fclk / self.pwm_freq_target))
-    sdcycles = ncycles / 4
+      ncycles = int(math.ceil(self.fclk / self.pwm_freq_target))
+      sdcycles = ncycles / 4
 
     # Adjust TOFF and TBL
     self.toff = 5  # Increase to improve stability
