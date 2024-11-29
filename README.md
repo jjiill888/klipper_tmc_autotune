@@ -68,21 +68,13 @@ Also note that the sensorless homing tuning will most likely change due to the o
 Add the following to your `printer.cfg` (change motor names and remove or add any sections as needed) to enable the autotuning for your TMC drivers and motors and restart Klipper:
 ```ini
 [autotune_tmc stepper_x]
-motor: ldo-42sth48-2004mah
+motor: bj42d29-30v00
 [autotune_tmc stepper_y]
-motor: ldo-42sth48-2004mah
+motor: bj42d29-30v00
 
 [autotune_tmc stepper_z]
-motor: ldo-42sth48-2004ac
-[autotune_tmc stepper_z1]
-motor: ldo-42sth48-2004ac
-[autotune_tmc stepper_z2]
-motor: ldo-42sth48-2004ac
-[autotune_tmc stepper_z3]
-motor: ldo-42sth48-2004ac
+motor: bj42d22-44v26
 
-[autotune_tmc extruder]
-motor: ldo-36sth20-1004ahg
 ```
 
 All the `[autotune_tmc]` sections accept additional parameters to tweak the behavior of the autotune process for each motor:
