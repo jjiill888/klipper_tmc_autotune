@@ -567,12 +567,14 @@ def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
         sconfig = config.getsection(stepper_name)
         rotation_dist, steps_per_rotation = stepper.parse_step_distance(sconfig)
         step_dist = rotation_dist / steps_per_rotation
-        threshold = TMCtstepHelper(step_dist, fields.get_field("mres"), tmc_freq, velocity)
+        if 'pstepper' in signature(TMCtstepHelper).parameters:
+            threshold = TMCtstepHelper(mcu_tmc, velocity, pstepper=stepper_name)
+        else:
+            threshold = TMCtstepHelper(step_dist, fields.get_field("mres"), tmc_freq, velocity)
         fields.set_field("tpwmthrs", threshold)
         en_pwm_mode = True
     reg = fields.lookup_register("en_pwm_mode", None)
     if reg is not None:
         fields.set_field("en_pwm_mode", en_pwm_mode)
     else:
-        # TMC2208 uses en_spreadCycle
         fields.set_field("en_spreadcycle", not en_pwm_mode)
