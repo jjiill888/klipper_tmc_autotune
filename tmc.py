@@ -556,7 +556,7 @@ def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
         return max(0, min(0xfffff, threshold))
     else:
         return 0xfffff
-        
+
 # Helper to configure "stealthchop" mode
 def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
     fields = mcu_tmc.get_fields()
@@ -576,4 +576,3 @@ def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
     else:
         # TMC2208 uses en_spreadCycle
         fields.set_field("en_spreadcycle", not en_pwm_mode)
-
