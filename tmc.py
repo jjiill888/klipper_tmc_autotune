@@ -548,6 +548,15 @@ def TMCMicrostepHelper(config, mcu_tmc):
     mres = ms_config.getchoice('microsteps', steps)
     fields.set_field("mres", mres)
     fields.set_field("intpol", config.getboolean("interpolate", True))
+    
+def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
+
+    if velocity > 0.:
+        step_dist_256 = step_dist / (1 << mres)
+        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
+        return max(0, min(0xfffff, threshold))
+    else:
+        return 0xfffff
 
 # Helper to configure "stealthchop" mode
 def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
