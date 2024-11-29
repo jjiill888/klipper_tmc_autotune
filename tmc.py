@@ -615,13 +615,3 @@ def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
     else:
         # TMC2208 uses en_spreadCycle
         fields.set_field("en_spreadcycle", not en_pwm_mode)
-def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
-
-     if velocity > 0.:
-        step_dist_256 = step_dist / (1 << mres)
-        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
-        return max(0, min(0xfffff, threshold))
-     else:
-        return 0xfffff
-
-
