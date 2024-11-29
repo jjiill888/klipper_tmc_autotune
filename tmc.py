@@ -548,14 +548,6 @@ def TMCMicrostepHelper(config, mcu_tmc):
     mres = ms_config.getchoice('microsteps', steps)
     fields.set_field("mres", mres)
     fields.set_field("intpol", config.getboolean("interpolate", True))
-# Helper for calculating TSTEP based values from velocity
-def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
-    if velocity > 0.:
-        step_dist_256 = step_dist / (1 << mres)
-        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
-        return max(0, min(0xfffff, threshold))
-    else:
-        return 0xfffff
 
 # Helper to configure "stealthchop" mode
 def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
@@ -567,14 +559,13 @@ def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
         sconfig = config.getsection(stepper_name)
         rotation_dist, steps_per_rotation = stepper.parse_step_distance(sconfig)
         step_dist = rotation_dist / steps_per_rotation
-        if 'pstepper' in signature(TMCtstepHelper).parameters:
-            threshold = TMCtstepHelper(mcu_tmc, velocity, pstepper=stepper_name)
-        else:
-            threshold = TMCtstepHelper(step_dist, fields.get_field("mres"), tmc_freq, velocity)
-        fields.set_field("tpwmthrs", threshold)
+        step_dist_256 = step_dist / (1 << fields.get_field("mres"))
+        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
+        fields.set_field("tpwmthrs", max(0, min(0xfffff, threshold)))
         en_pwm_mode = True
     reg = fields.lookup_register("en_pwm_mode", None)
     if reg is not None:
         fields.set_field("en_pwm_mode", en_pwm_mode)
     else:
+        # TMC2208 uses en_spreadCycle
         fields.set_field("en_spreadcycle", not en_pwm_mode)
