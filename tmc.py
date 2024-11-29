@@ -559,9 +559,8 @@ def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
         sconfig = config.getsection(stepper_name)
         rotation_dist, steps_per_rotation = stepper.parse_step_distance(sconfig)
         step_dist = rotation_dist / steps_per_rotation
-        step_dist_256 = step_dist / (1 << fields.get_field("mres"))
-        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
-        fields.set_field("tpwmthrs", max(0, min(0xfffff, threshold)))
+        threshold = TMCtstepHelper(step_dist, fields.get_field("mres"), tmc_freq, velocity)
+        fields.set_field("tpwmthrs", threshold)
         en_pwm_mode = True
     reg = fields.lookup_register("en_pwm_mode", None)
     if reg is not None:
@@ -569,3 +568,12 @@ def TMCStealthchopHelper(config, mcu_tmc, tmc_freq):
     else:
         # TMC2208 uses en_spreadCycle
         fields.set_field("en_spreadcycle", not en_pwm_mode)
+
+# Helper for calculating TSTEP based values from velocity
+def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
+    if velocity > 0.:
+        step_dist_256 = step_dist / (1 << mres)
+        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
+        return max(0, min(0xfffff, threshold))
+    else:
+        return 0xfffff
