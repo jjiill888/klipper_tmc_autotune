@@ -584,6 +584,8 @@ def TMCMicrostepHelper(config, mcu_tmc):
 
 # Helper for calculating TSTEP based values from velocity
 def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
+    if step_dist <= 0 or mres < 0 or tmc_freq <= 0:
+        raise ValueError("Invalid parameters passed to TMCtstepHelper.")
     if velocity > 0.:
         step_dist_256 = step_dist / (1 << mres)
         threshold = int(tmc_freq * step_dist_256 / velocity + .5)
