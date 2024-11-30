@@ -15,7 +15,7 @@ In particular, it enables StealthChop by default on Z motors and extruders, Cool
 - Using autotuning for your motors can improve efficiency by allowing them to run cooler and consume less power. However, it's important to note that this process can also cause the TMC drivers to run hotter, so proper cooling measures must be implemented.
 
 
-## Installation
+## 1.Installation
 
 Creatily's klipper directory is in /usr/share/klipper/
 
@@ -32,6 +32,20 @@ sudo cp /usr/share/klipper/klipper_tmc_autotune/motor_constants.py /usr/share/kl
 sudo cp /usr/share/klipper/klipper_tmc_autotune/motor_database.cfg /usr/share/klipper/klippy/extras/
 sudo cp /usr/share/klipper/klipper_tmc_autotune/tmc.py /usr/share/klipper/klippy/extras/
 ```
+if you don't want to use my tmc.py, you should edit you tmc.py in /usr/share/klipper/klippy/extras/, please use vi to edit it.
+
+```
+def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
+
+    if velocity > 0.:
+        step_dist_256 = step_dist / (1 << mres)
+        threshold = int(tmc_freq * step_dist_256 / velocity + .5)
+        return max(0, min(0xfffff, threshold))
+    else:
+        return 0xfffff
+
+```
+Creality's Klipper has been heavily trimmed, and 'TMCtstepHelper' has been removed from tmc.py. Refer to this line in the [K1-Klipper](https://github.com/K1-Klipper/klipper/blob/3423dc0896c4dc12c9173d86c493dac8c640462b/klippy/extras/tmc.py#L586) repository for the missing TMCtstepHelper implementation in tmc.py. You need to manually reintroduce it to enable Klipper TMC autotune.
 
 Then, add the following to your `moonraker.conf` to enable automatic updates:（This is a step that does not need to be taken）
 ```ini
@@ -45,7 +59,7 @@ primary_branch: main
 install_script: install.sh
 ```
 
-## Adjusting existing configuration
+## 2.Adjusting existing configuration
 
 Your driver configurations should contain:
 * Pins
@@ -57,13 +71,13 @@ The Klipper documentation recommends not using interpolation. However, that is m
 
 Check the pinouts of your stepper driver boards: BTT TMC 2240 boards require configuring `diag1_pin` not `diag0_pin`, but MKS TMC 2240 stepsticks require `diag0_pin` and *not* `diag1_pin`. There may be other unusual drivers.
 
-## Sensorless homing
+## 3.Sensorless homing
 
 Autotune can be used together with homing overrides for sensorless homing. However, you must adjust the `sg4_thrs` (TMC2209, TMC2260) and/or `sgt` (TMC5160, TMC2240, TMC2130, TMC2660) values specifically in the autotune sections. Attempting to make these changes via gcode or via the tmc driver sections will not result in an error message, but will have no effect since the autotuning algorithm will simply override them.
 
 Also note that the sensorless homing tuning will most likely change due to the other settings. In particular, autotune may require faster homing speeds to work; take the `rotation_distance` of the stepper as a minimum speed that can work, and if it is hard to tune home faster. Sensorless homing becomes much more sensitive at higher speeds.
 
-## Autotune configuration
+## 4.Autotune configuration
 
 Add the following to your `printer.cfg` (change motor names and remove or add any sections as needed) to enable the autotuning for your TMC drivers and motors and restart Klipper:
 ```ini
@@ -76,7 +90,30 @@ motor: bj42d29-30v00
 motor: bj42d22-44v26
 
 ```
+## 5.To reduce the impact noise with virtual endstops
 
+If, during XZ-axis homing, the motor produces loud noise, you must adjust the virtual endstops. A value between 60-50 is acceptable. However, setting driver_SGTHRS too low (e.g., < 30) may cause false triggers (detecting a stop without contact). 
+
+Typically, 50-60 provides a good balance between noise reduction and reliability.
+```ini
+[tmc2209 stepper_x]
+uart_pin:PA9
+interpolate: True
+run_current:1.0
+hold_current:1.0
+sense_resistor: 0.100
+stealthchop_threshold: 0
+uart_address:3
+diag_pin: ^PB12
+# driver_IHOLDDELAY: 8
+# driver_TPOWERDOWN: 20
+# driver_TBL: 1
+# driver_TOFF: 1
+# driver_HEND: 0
+# driver_HSTRT: 7
+# driver_SGTHRS: 75
+driver_SGTHRS: 60
+```
 All the `[autotune_tmc]` sections accept additional parameters to tweak the behavior of the autotune process for each motor:
 
 | Parameter | Default value | Range | Description |
