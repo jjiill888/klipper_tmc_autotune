@@ -45,7 +45,9 @@ def TMCtstepHelper(step_dist, mres, tmc_freq, velocity):
         return 0xfffff
 
 ```
-Creality's Klipper has been heavily trimmed, and 'TMCtstepHelper' has been removed from tmc.py. Refer to this line in the [K1-Klipper](https://github.com/K1-Klipper/klipper/blob/3423dc0896c4dc12c9173d86c493dac8c640462b/klippy/extras/tmc.py#L586) repository for the missing TMCtstepHelper implementation in tmc.py. You need to manually reintroduce it to enable Klipper TMC autotune.
+Creality's Klipper has been heavily trimmed, and 'TMCtstepHelper' has been removed from tmc.py. Refer to this line in the [K1-Klipper](https://github.com/K1-Klipper/klipper/blob/3423dc0896c4dc12c9173d86c493dac8c640462b/klippy/extras/tmc.py#L586) repository for the missing TMCtstepHelper implementation in tmc.py, and Place the TMCtstepHelper implementation right before the TMCStealthchopHelper in tmc.py.
+
+You need to manually reintroduce it to enable Klipper TMC autotune.
 
 Then, add the following to your `moonraker.conf` to enable automatic updates:（This is a step that does not need to be taken）
 ```ini
